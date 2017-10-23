@@ -1,6 +1,5 @@
 
 import java.awt.BorderLayout;
-import java.awt.Container;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -27,28 +26,25 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 {
 	private static final long serialVersionUID = 1L;
 	
-	private Container container;
-	private JLabel lGatoCabeca, lTelefone, lCelular;
-	private JTextField tNome, tTelefone, tCelular;
+	private JLabel lGatoCabeca, lPassos, lEstado, lPassosTexto, lEstadoTexto;
 	private JTextField tFita[];
-	private JButton bCadastrar, bCancelar, bRetomar, bBuscarLinguagem, bIniciar, bProximoPasso;
+	private JButton  bBuscarLinguagem, bIniciar, bProximoPasso;
 	private JSlider sliVelocidadePassos;
 	
 	private JPanel pCentro, pNorte, pSul;
 	
 	private MaquinaTuring maquina;
 	private ArrayList<Regras> listaRegras;
-	private int passo;
 	private int posicaoCabeca;
 	private boolean fimLinguagem;
 	//Velocidade da "Animação" sendo 0 o mais lento e -- o mais rapido
 	private int velocidade = 0;
-	
+	private int contagemPasso = 0;
 	
 	public TelaMaquinaTuring()
 	{
 		super("Maquina de Turing");
-		container = getContentPane();
+		getContentPane();
 		setLayout(new BorderLayout(10, 10));
 
 		// Titulo
@@ -57,9 +53,21 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 		lTitulo.setFont(fonteTitulo);
 		lTitulo.setAlignmentX(CENTER_ALIGNMENT);
 		lTitulo.setHorizontalAlignment(SwingConstants.CENTER);
-
-		pNorte = new JPanel();
-		pNorte.setBorder(new EmptyBorder(10, 0, 0, 0));
+		
+		Font fonte = new Font("Arial", Font.BOLD, 16);
+		lPassosTexto = new JLabel("Passo: ");
+		lPassosTexto.setFont(fonte);
+		
+		lPassos = new JLabel();
+		lPassos.setFont(fonte);
+		
+		lEstadoTexto = new JLabel("Estado: ");
+		lEstadoTexto.setFont(fonte);
+		
+		lEstado = new JLabel();
+		lEstado.setFont(fonte);
+		
+		pNorte = new JPanel(new GridBagLayout());
 
 		pCentro = new JPanel(new GridBagLayout());
 		pSul= new JPanel(new GridBagLayout());
@@ -68,13 +76,6 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 		lGatoCabeca = new JLabel();
 		ImageIcon imagem = new ImageIcon(getClass().getResource("gato.png"));
 		lGatoCabeca.setIcon(imagem);
-		
-		lTelefone= new JLabel("Telefone:");
-		lCelular = new JLabel("Celular:");
-
-		tNome = new JTextField(20);
-		tTelefone= new JTextField(10);
-		tCelular= new JTextField(10);
 		
 		tFita = new JTextField[21];
 		
@@ -87,22 +88,16 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 		}
 		
 		bBuscarLinguagem = new JButton("Buscar Linguagem");
-		bBuscarLinguagem.addActionListener(this);
+		bBuscarLinguagem.addActionListener(this);		
 		
 		bProximoPasso = new JButton("Proximo Passo");
 		bProximoPasso.addActionListener(this);
+		bProximoPasso.setEnabled(false);
 		
-		bCadastrar = new JButton("CA");
-		bCadastrar.addActionListener(this);
 		
 		bIniciar = new JButton("Iniciar Automatico");
 		bIniciar.addActionListener(this);
-		
-		bCancelar = new JButton("Cancelar");
-		bCancelar.addActionListener(this);
-		
-		bRetomar = new JButton("Retomar");
-		bRetomar.addActionListener(this);
+		bIniciar.setEnabled(false);
 		
 		//Configura o slider de velocidade		
 		sliVelocidadePassos = new JSlider(JSlider.HORIZONTAL, 0, 12, 0);
@@ -188,6 +183,31 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 		gBC.insets = new Insets(5, 5, 5, 5);
 		pSul.add(sliVelocidadePassos, gBC);
 		
+		
+		gBC.gridx = 0;//col
+		gBC.gridy = 0;//lin
+		gBC.gridwidth = 1;
+		gBC.insets = new Insets(5, 5, 5, 5);
+		pNorte.add(lPassosTexto, gBC);
+		
+		gBC.gridx = 0;//col
+		gBC.gridy = 1;//lin
+		gBC.gridwidth = 1;
+		gBC.insets = new Insets(5, 5, 5, 5);
+		pNorte.add(lEstadoTexto, gBC);
+		
+		gBC.gridx = 1;//col
+		gBC.gridy = 0;//lin
+		gBC.gridwidth = 1;
+		gBC.insets = new Insets(5, 5, 5, 5);
+		pNorte.add(lPassos, gBC);
+		
+		gBC.gridx = 1;//col
+		gBC.gridy = 1;//lin
+		gBC.gridwidth = 1;
+		gBC.insets = new Insets(5, 5, 5, 5);
+		pNorte.add(lEstado, gBC);
+		
 //		gBC.fill = GridBagConstraints.HORIZONTAL;
 //		gBC.gridx = 0;//col
 //		gBC.gridy = 2;//lin
@@ -207,11 +227,13 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 //		gBC.insets = new Insets(5, 5, 5, 5);
 //		pCentro.add(bRetomar, gBC);
 
-		pNorte.add(lTitulo);
+		//pNorte.add(lTitulo);
 
-		add(pNorte, BorderLayout.NORTH);
+		//add(pNorte, BorderLayout.NORTH);
 		add(pCentro, BorderLayout.CENTER);
-		add(pSul, BorderLayout.SOUTH);
+		add(pSul, BorderLayout.NORTH);
+		add(pNorte, BorderLayout.SOUTH);
+		
 
 		setVisible(true);
 		setSize(800, 300);
@@ -225,14 +247,16 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 		new TelaMaquinaTuring();
 	}
 
+	//--------------------------------------------------------------------------------Eventos dos Botões
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		//Buscar Linguagem
 		if(e.getSource() == bBuscarLinguagem){	
 			//Limpa a tela atual
 			ResetaFitaTela();
 			
 			maquina = new MaquinaTuring();
-			passo = 0;
+		
 			posicaoCabeca = 10;
 			fimLinguagem = false;
 			
@@ -256,13 +280,22 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 
 			// maquina.inicioFita(50, lista);
 			System.out.println(maquina.mostraFita());
+			
+			bProximoPasso.setEnabled(true);
+			bIniciar.setEnabled(true);
+			
 		}
+		//ProximoPasso
 		else if(e.getSource() == bProximoPasso)
 		{
 			proximoPasso();	
 		}
+		//Inicio Automatico
 		else if(e.getSource() == bIniciar)
 		{
+			//Bloqueia botão proximo passo
+			bProximoPasso.setEnabled(false);
+			
 			new Thread(new Runnable() {
 				
 				@Override
@@ -283,19 +316,8 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 			}).start();
 			
 		}
-		else if(e.getSource() == bCadastrar)
-		{
-
-			
-		}	
-		else if(e.getSource() == bCancelar)
-		{
-					}
-		else if(e.getSource()==bRetomar)
-		{
-			
-		}
 	}
+	//--------------------------------------------------Fim Eventos dos Botões
 	
 	public void cabecaDireita()
 	{
@@ -373,9 +395,14 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 				}
 
 				// Altera o estado atual
-				maquina.setEstadoAtual(listaRegras.get(i).getProximoEstado());
+				String estado = listaRegras.get(i).getProximoEstado();
+				lEstado.setText(estado);
+				maquina.setEstadoAtual(estado);
+				contagemPasso++;
+				lPassos.setText(""+contagemPasso);
+				
 				System.out.println(maquina.mostraFita());
-				passo++;
+
 				return;
 			}
 		}
@@ -395,6 +422,10 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 	
 	public void ResetaFitaTela()
 	{
+		lEstado.setText("");
+		lPassos.setText("");
+		contagemPasso = 0;
+		
 		lGatoCabeca.setLocation(379, 35);
 		for(int i = 0; i < 21; i++)
 		{
