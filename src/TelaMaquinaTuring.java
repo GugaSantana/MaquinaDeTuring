@@ -1,5 +1,6 @@
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -15,7 +16,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
@@ -26,10 +29,12 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 {
 	private static final long serialVersionUID = 1L;
 	
-	private JLabel lGatoCabeca, lPassos, lEstado, lPassosTexto, lEstadoTexto;
+	private JLabel lGatoCabeca, lPassos, lEstado, lPassosTexto, lEstadoTexto, lRegraUsada, lRegraUsadaTexto;
 	private JTextField tFita[];
 	private JButton  bBuscarLinguagem, bIniciar, bProximoPasso;
 	private JSlider sliVelocidadePassos;
+	private JTextArea taHistorico;
+	private JScrollPane spHistorico;
 	
 	private JPanel pCentro, pNorte, pSul;
 	
@@ -40,6 +45,7 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 	//Velocidade da "Animação" sendo 0 o mais lento e -- o mais rapido
 	private int velocidade = 0;
 	private int contagemPasso = 0;
+	private String estadoFinal;
 	
 	public TelaMaquinaTuring()
 	{
@@ -61,11 +67,24 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 		lPassos = new JLabel();
 		lPassos.setFont(fonte);
 		
-		lEstadoTexto = new JLabel("Estado: ");
+		lEstadoTexto = new JLabel("Estado atual: ");
 		lEstadoTexto.setFont(fonte);
 		
 		lEstado = new JLabel();
 		lEstado.setFont(fonte);
+		
+		lRegraUsada= new JLabel();
+		lRegraUsada.setFont(fonte);
+		
+		lRegraUsadaTexto= new JLabel("Regra: ");
+		lRegraUsadaTexto.setFont(fonte);
+		
+		taHistorico = new JTextArea();
+		taHistorico.setEditable(false);
+		
+		spHistorico = new JScrollPane(taHistorico);
+		spHistorico.setPreferredSize(new Dimension(1000, 300));
+		
 		
 		pNorte = new JPanel(new GridBagLayout());
 
@@ -77,9 +96,10 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 		ImageIcon imagem = new ImageIcon(getClass().getResource("gato.png"));
 		lGatoCabeca.setIcon(imagem);
 		
-		tFita = new JTextField[21];
 		
-		for(int i = 0; i < 21; i++)
+		tFita = new JTextField[31];
+		
+		for(int i = 0; i < 31; i++)
 		{
 			tFita[i] = new JTextField(2);		
 			tFita[i].setFont(tFita[i].getFont().deriveFont(20f));
@@ -100,7 +120,7 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 		bIniciar.setEnabled(false);
 		
 		//Configura o slider de velocidade		
-		sliVelocidadePassos = new JSlider(JSlider.HORIZONTAL, 0, 12, 0);
+		sliVelocidadePassos = new JSlider(JSlider.HORIZONTAL, 0, 18, 0);
 		
 		sliVelocidadePassos.addChangeListener(this);
 		sliVelocidadePassos.setMajorTickSpacing(3);
@@ -109,8 +129,8 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 		//Personaliza o Slider para aparecer labels
 		Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
 		labelTable.put( new Integer( 0 ), new JLabel("Lento") );
-		labelTable.put( new Integer(12), new JLabel("Rapido"));
-		labelTable.put( new Integer( 6), new JLabel("Medio"));
+		labelTable.put( new Integer(18), new JLabel("Rapido"));
+		labelTable.put( new Integer( 9), new JLabel("Medio"));
 		sliVelocidadePassos.setLabelTable( labelTable );
 
 		sliVelocidadePassos.setPaintLabels(true);
@@ -120,20 +140,31 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 		gBC.fill = GridBagConstraints.HORIZONTAL;
 		gBC.anchor = GridBagConstraints.NORTHWEST;
 		
-		for(int i = 0; i<21;i++) {
+		for(int i = 0; i<31;i++) {
 		gBC.gridx = i;//col
 		gBC.gridy = 1;//lin
 		gBC.insets = new Insets(0, 0, 0, 0);
 		pCentro.add(tFita[i], gBC);
 		}
 		
-		gBC.gridx = 10;//col
+		lGatoCabeca.setHorizontalTextPosition(SwingConstants.CENTER);
+		
+		gBC.fill = GridBagConstraints.NONE;
+		gBC.anchor = GridBagConstraints.CENTER;
+		
+		
+		gBC.gridx = 0;//col
 		gBC.gridy = 0;//lin
-		gBC.gridwidth = 3;
+		gBC.gridwidth = 31;
 		gBC.insets = new Insets(5, 5, 5, 5);
 		pCentro.add(lGatoCabeca, gBC);
-		lGatoCabeca.setLocation(10, lGatoCabeca.getY());
+
+		gBC.fill = GridBagConstraints.HORIZONTAL;
+		gBC.anchor = GridBagConstraints.NORTHWEST;
 		
+		
+		//		lGatoCabeca.setLocation(579, 28);
+//		
 //		
 //		gBC.gridx = 0;//col
 //		gBC.gridy = 1;//lin
@@ -196,6 +227,12 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 		gBC.insets = new Insets(5, 5, 5, 5);
 		pNorte.add(lEstadoTexto, gBC);
 		
+		gBC.gridx = 0;//col
+		gBC.gridy = 2;//lin
+		gBC.gridwidth = 1;
+		gBC.insets = new Insets(5, 5, 5, 5);
+		pNorte.add(lRegraUsadaTexto, gBC);
+		
 		gBC.gridx = 1;//col
 		gBC.gridy = 0;//lin
 		gBC.gridwidth = 1;
@@ -207,6 +244,18 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 		gBC.gridwidth = 1;
 		gBC.insets = new Insets(5, 5, 5, 5);
 		pNorte.add(lEstado, gBC);
+		
+		gBC.gridx = 1;//col
+		gBC.gridy = 2;//lin
+		gBC.gridwidth = 1;
+		gBC.insets = new Insets(5, 5, 5, 5);
+		pNorte.add(lRegraUsada, gBC);
+		
+		gBC.gridx = 0;//col
+		gBC.gridy = 3;//lin
+		gBC.gridwidth = 2;
+		gBC.insets = new Insets(5, 5, 50, 5);
+		pNorte.add(spHistorico, gBC);
 		
 //		gBC.fill = GridBagConstraints.HORIZONTAL;
 //		gBC.gridx = 0;//col
@@ -236,15 +285,18 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 		
 
 		setVisible(true);
-		setSize(800, 300);
+		setSize(1200, 300);
+		setMinimumSize(new Dimension(1200, 300));
 		setLocationRelativeTo(null);
-		// setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		// setMinimumSize(getSize());
+
 	}
 
 	public static void main(String[] args)
 	{
 		new TelaMaquinaTuring();
+		
 	}
 
 	//--------------------------------------------------------------------------------Eventos dos Botões
@@ -257,7 +309,7 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 			
 			maquina = new MaquinaTuring();
 		
-			posicaoCabeca = 10;
+			posicaoCabeca = 15;
 			fimLinguagem = false;
 			
 			LerArquivoTxt lerLinguagem = new LerArquivoTxt();
@@ -270,13 +322,15 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 			//Preenche fita da tela
 			for(int i = 0; i < valoresFita.length();i++)
 			{
-				tFita[10+i].setText(valoresFita.substring(i, i+1));
+				tFita[15+i].setText(valoresFita.substring(i, i+1));
 			}		
 			
 			// Estado inicial
 			String estadoAtual = lerLinguagem.getEstadoInicial();
 			maquina.setEstadoAtual(estadoAtual);
 			
+			// Estado final
+			estadoFinal = lerLinguagem.getEstadoFinal();
 
 			// maquina.inicioFita(50, lista);
 			System.out.println(maquina.mostraFita());
@@ -288,7 +342,21 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 		//ProximoPasso
 		else if(e.getSource() == bProximoPasso)
 		{
-			proximoPasso();	
+			if(!fimLinguagem)
+			{
+				proximoPasso();
+			}
+			else
+			{
+				if(maquina.getEstadoAtual().equals(estadoFinal))
+				{
+					JOptionPane.showMessageDialog(null, "Linguagem Aceita!");
+				}
+				else
+				{
+					JOptionPane.showMessageDialog(null, "Linguagem Não Aceita!");
+				}
+			}
 		}
 		//Inicio Automatico
 		else if(e.getSource() == bIniciar)
@@ -306,12 +374,21 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 					{
 						proximoPasso();
 						try {
-							Thread.sleep(1100-(velocidade*36));
+							Thread.sleep(1000-(velocidade*36));
 						} catch (InterruptedException ex) {
 							// TODO Auto-generated catch block
 							ex.printStackTrace();
 						}
 					}
+					if(maquina.getEstadoAtual().equals(estadoFinal))
+					{
+						JOptionPane.showMessageDialog(null, "Linguagem Aceita!");
+					}
+					else
+					{
+						JOptionPane.showMessageDialog(null, "Linguagem Não Aceita!");
+					}
+					
 				}
 			}).start();
 			
@@ -327,6 +404,7 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
+				lGatoCabeca.repaint();
 				int x=lGatoCabeca.getX();
 				int y =lGatoCabeca.getY();
 				
@@ -340,7 +418,7 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 					x += 1;
 
 					lGatoCabeca.setLocation(x, y);
-
+					
 				}
 			}
 		}).start();
@@ -367,7 +445,7 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 					x -= 1;
 
 					lGatoCabeca.setLocation(x, y);
-
+					
 				}
 			}
 		}).start();
@@ -399,9 +477,20 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 				lEstado.setText(estado);
 				maquina.setEstadoAtual(estado);
 				contagemPasso++;
+				//Passo
 				lPassos.setText(""+contagemPasso);
+				//Regra
+				lRegraUsada.setText(listaRegras.get(i).getRegraUsada());				
+				//Adiciona no Historico
+				String historico = contagemPasso + " - " + listaRegras.get(i).getRegraUsada() + ";\n";
+				taHistorico.append(historico);
+				//Scroll Descer junto
+				taHistorico.setCaretPosition(taHistorico.getText().length());
 				
+				
+				//Mostra fita Console
 				System.out.println(maquina.mostraFita());
+				
 
 				return;
 			}
@@ -422,12 +511,12 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 	
 	public void ResetaFitaTela()
 	{
+		taHistorico.setText("");
 		lEstado.setText("");
 		lPassos.setText("");
-		contagemPasso = 0;
+		contagemPasso = 0;		
 		
-		lGatoCabeca.setLocation(379, 35);
-		for(int i = 0; i < 21; i++)
+		for(int i = 0; i < 31; i++)
 		{
 			tFita[i].setText("-");			
 		}

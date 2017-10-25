@@ -41,5 +41,11 @@ public class Regras {
 	public void setProximoValor(String proximoValor) {
 		this.proximoValor = proximoValor;
 	}
+	public String getRegraUsada()
+	{
+		String retorno;
+		retorno = getAtualEstado() + ", " + getAtualValor() + " = " + getProximoEstado() + ", " + getProximoValor() + ", " + getDirecaoCabeca();
+		return retorno;
+	}
 	
 }

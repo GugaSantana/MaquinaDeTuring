@@ -13,6 +13,7 @@ import org.omg.PortableServer.ServantRetentionPolicyValue;
 public class LerArquivoTxt {
 	
 	private String estadoInicial = "";
+	private String estadoFinal = "";
 	
 	public String getEstadoInicial() {
 		return estadoInicial;
@@ -21,6 +22,15 @@ public class LerArquivoTxt {
 	public void setEstadoInicial(String estadoInicial) {
 		this.estadoInicial = estadoInicial;
 	}
+	
+	public String getEstadoFinal() {
+		return estadoFinal;
+	}
+
+	public void setEstadoFinal(String estadoFinal) {
+		this.estadoFinal = estadoFinal;
+	}
+
 	
 	public ArrayList<Regras> ler() {
 		ArrayList<Regras> listaRegras = new ArrayList<Regras>();
@@ -61,6 +71,15 @@ public class LerArquivoTxt {
 			 linha = linha.replaceAll(" ", "");
 			 setEstadoInicial(linha);
 		 }
+		 
+		 linha = bufferedReader.readLine();		 
+		 if(linha != null)
+		 {
+			 linha = linha.replaceAll(" ", "");
+			 setEstadoFinal(linha);
+		 }
+		 
+		 
 		 while ((linha = bufferedReader.readLine()) != null) {
 				// Aqui imprimimos a linha
 //				System.out.println(linha);
