@@ -285,17 +285,20 @@ public class TelaMaquinaTuring extends JFrame implements ActionListener, ChangeL
 		
 
 		setVisible(true);
-		setSize(1200, 300);
-		setMinimumSize(new Dimension(1200, 300));
+		setExtendedState(MAXIMIZED_BOTH);
+		setResizable(false);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		// setMinimumSize(getSize());
+		
+		
 
 	}
 
 	public static void main(String[] args)
 	{
 		new TelaMaquinaTuring();
+		
 		
 	}
 
